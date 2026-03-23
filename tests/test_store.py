@@ -106,7 +106,7 @@ def test_empty_file_returns_unknown(state_file):
 # Unknown state string -> read() returns UNKNOWN
 # ---------------------------------------------------------------------------
 def test_unknown_state_string_returns_unknown(state_file):
-    bad = {"version": 1, "state": "BLAH", "timestamp": 0, "checksum": "00000000"}
+    bad = {"version": 1, "state": "BLAH", "timestamp": 0, "checksum": "206ccd8c"}
     state_file.write_text(json.dumps(bad))
     store = mss.Store(state_file)
     assert store.read() == mss.State.UNKNOWN

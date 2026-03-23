@@ -168,16 +168,13 @@ TEST_F(StoreTest, UnknownStateStringReturnsUnknown)
     // Instead, we just write a JSON with an unknown state string and a matching
     // checksum by computing it ourselves in the test.
 
-    // Canonical string for version=1, state="BLAH", timestamp=0:
-    // CRC32("1|BLAH|0") — we just write mismatched state and verify UNKNOWN.
-    // Simpler: write a file with missing "state" field.
+    // CRC32("1|BLAH|0") = 0x206ccd8c — valid checksum for this payload,
+    // so the unknown-state check (not the checksum check) triggers UNKNOWN.
     std::ofstream ofs(state_file_);
-    ofs << R"({"version":1,"state":"BLAH","timestamp":0,"checksum":"00000000"})";
+    ofs << R"({"version":1,"state":"BLAH","timestamp":0,"checksum":"206ccd8c"})";
     ofs.close();
 
     Store store(state_file_);
-    // Either the checksum mismatch triggers first (the "00000000" is wrong),
-    // or the unknown state check triggers — either way, result must be UNKNOWN.
     EXPECT_EQ(store.read(), State::UNKNOWN);
 }
 

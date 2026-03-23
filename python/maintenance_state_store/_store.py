@@ -72,14 +72,14 @@ class Store:
                 if field not in data:
                     return State.UNKNOWN
 
-            if not isinstance(data["version"], int) or data["version"] != _VERSION:
+            if type(data["version"]) is not int or data["version"] != _VERSION:
                 return State.UNKNOWN
 
             if not isinstance(data["state"], str):
                 return State.UNKNOWN
             state_str: str = data["state"]
 
-            if not isinstance(data["timestamp"], int):
+            if type(data["timestamp"]) is not int:
                 return State.UNKNOWN
             timestamp: int = data["timestamp"]
 
@@ -146,7 +146,7 @@ class Store:
                 f.flush()
                 os.fsync(f.fileno())
 
-            os.rename(tmp_path, self._path)
+            os.replace(tmp_path, self._path)
 
             # fsync parent directory to persist the directory entry
             dir_fd = os.open(str(self._path.parent), os.O_RDONLY)
