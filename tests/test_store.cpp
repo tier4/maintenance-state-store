@@ -1,5 +1,6 @@
 #include "maintenance_state_store/maintenance_state_store.hpp"
 
+#include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>

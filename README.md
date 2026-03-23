@@ -47,7 +47,8 @@ cmake/
   maintenance_state_store-config.cmake.in
 .github/
   workflows/
-    ci.yml                            GHA: cpp / python (matrix) / compat jobs
+    test.yml                          GHA: cpp / python (matrix) / compat jobs
+    release.yml                       GHA: release / publish jobs
     claude.yml                        Claude Code action
 ```
 

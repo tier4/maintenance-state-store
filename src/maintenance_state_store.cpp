@@ -92,17 +92,6 @@ std::string uint32_to_hex(uint32_t v)
     return result;
 }
 
-/// Parse a hex string to uint32_t.
-/// Uses std::from_chars (C++17): no locale, no exceptions.
-bool hex_to_uint32(std::string_view hex, uint32_t &out)
-{
-    if (hex.empty() || hex.size() > 8) {
-        return false;
-    }
-    auto [ptr, ec] = std::from_chars(hex.data(), hex.data() + hex.size(), out, 16);
-    return ec == std::errc{} && ptr == hex.data() + hex.size();
-}
-
 /// Get the current Unix timestamp (seconds since epoch).
 int64_t current_timestamp() { return static_cast<int64_t>(std::time(nullptr)); }
 
@@ -174,12 +163,10 @@ State Store::read() const
         if (!j["checksum"].is_string()) {
             return State::UNKNOWN;
         }
-        uint32_t stored_checksum = 0;
-        if (!hex_to_uint32(j["checksum"].get<std::string>(), stored_checksum)) {
-            return State::UNKNOWN;
-        }
+        const std::string stored_checksum = j["checksum"].get<std::string>();
 
-        if (crc32(canonical_string(kVersion, state_str, timestamp)) != stored_checksum) {
+        if (uint32_to_hex(crc32(canonical_string(kVersion, state_str, timestamp))) !=
+            stored_checksum) {
             return State::UNKNOWN;
         }
 
