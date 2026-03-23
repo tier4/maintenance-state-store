@@ -2,7 +2,7 @@
 
 A library for **safe persistent management of maintenance state** in a vehicle OTA safety system.
 
-Design document: [Prevent OTA updates during vehicle operation - Developer Design Document](https://tier4.atlassian.net/wiki/spaces/OTA/pages/4886593603/)
+Design document: Prevent OTA updates during vehicle operation - Developer Design Document
 
 ---
 
