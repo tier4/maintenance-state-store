@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Design document: [Prevent OTA updates during vehicle operation](https://tier4.atlassian.net/wiki/spaces/OTA/pages/4886593603/)
+Design document: Prevent OTA updates during vehicle operation
 
 This library is part of the safety mechanism that prevents OTA updates from being applied
 to a vehicle while it is driving. It serves as the **Source of Truth for the Fail-Prevent layer**,
