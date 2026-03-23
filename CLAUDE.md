@@ -53,14 +53,15 @@ cmake --build build && cd build && ctest --output-on-failure && cd .. && pytest 
 
 ### C++
 
-| File                                                          | Role                                               |
-| ------------------------------------------------------------- | -------------------------------------------------- |
-| `include/maintenance_state_store/maintenance_state_store.hpp` | Public C++ API (`State` enum + `Store` class)      |
-| `src/maintenance_state_store.cpp`                             | Core implementation (CRC32, atomic write, read)    |
-| `CMakeLists.txt`                                              | Build definition — produces `.a` and `.so`         |
-| `tests/test_store.cpp`                                        | GoogleTest suite (20 cases)                        |
-| `tests/mss_cli.cpp`                                           | CLI tool for cross-language tests (`write`/`read`) |
-| `tests/fixtures/`                                             | Shared JSON fixtures verified by both test suites  |
+| File                                                          | Role                                                          |
+| ------------------------------------------------------------- | ------------------------------------------------------------- |
+| `include/maintenance_state_store/maintenance_state_store.hpp` | Public C++ API (`State` enum + `Store` class)                 |
+| `src/maintenance_state_store.cpp`                             | Core implementation (CRC32, atomic write, read)               |
+| `CMakeLists.txt`                                              | Build definition — produces `.a` and `.so`; ament_cmake support |
+| `package.xml`                                                 | ROS2 package manifest — required for colcon workspace builds    |
+| `tests/test_store.cpp`                                        | GoogleTest suite (20 cases)                                   |
+| `tests/mss_cli.cpp`                                           | CLI tool for cross-language tests (`write`/`read`)            |
+| `tests/fixtures/`                                             | Shared JSON fixtures verified by both test suites             |
 
 ### Python
 
@@ -83,10 +84,10 @@ On release, the CI overwrites it with the tag: `echo "${GITHUB_REF_NAME#v}" > VE
 
 ### CI
 
-| File                          | Role                                                   |
-| ----------------------------- | ------------------------------------------------------ |
-| `.github/workflows/test.yml`  | `cpp`, `python` (matrix), `sonar`, `compat` — on push/PR |
-| `.github/workflows/release.yml` | `cpp`, `python` — on `v*` tag push, uploads artifacts |
+| File | Role |
+| --- | --- |
+| `.github/workflows/test.yml` | `cpp`, `python` (matrix), `sonar`, `compat` — on push/PR |
+| `.github/workflows/release.yml` | `python` only — on `v*` tag push, uploads `.whl`/`.tar.gz` |
 
 ---
 

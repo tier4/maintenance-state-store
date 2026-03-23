@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>maintenance_state_store</name>
+  <version>0.1.0</version>
+  <description>Atomic persistent store for OTA maintenance state</description>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

@@ -41,7 +41,8 @@ tests/
   test_store.py                       Python unit tests (pytest, 27 cases)
   mss_cli.cpp                         CLI tool for cross-language tests
   fixtures/                           Shared JSON fixtures (ON/OFF)
-CMakeLists.txt                        C++ build — produces .a and .so
+CMakeLists.txt                        C++ build — produces .a and .so; ament_cmake support
+package.xml                           ROS2 package manifest (colcon)
 pyproject.toml                        Python package config (hatchling)
 cmake/
   maintenance_state_store-config.cmake.in
@@ -86,6 +87,30 @@ Installs `.a`, `.so*`, the public header, and CMake config files.
 
 ```bash
 cmake -B build -DBUILD_TESTING=OFF
+```
+
+### colcon Workspace (ROS2)
+
+Place this repository under `src/` in your colcon workspace:
+
+```bash
+cd <your_ws>/src
+git clone https://github.com/tier4/maintenance-state-store.git
+cd ..
+colcon build --packages-select maintenance_state_store
+```
+
+In the consuming package's `package.xml`:
+
+```xml
+<depend>maintenance_state_store</depend>
+```
+
+In its `CMakeLists.txt`:
+
+```cmake
+find_package(maintenance_state_store REQUIRED)
+target_link_libraries(your_target PRIVATE maintenance::maintenance_state_store)
 ```
 
 ---
@@ -163,12 +188,14 @@ bool ok = store.write(State::OFF);  // Exit maintenance mode
 bool ok = store.force_write(State::OFF);
 ```
 
-When using via CMake:
+When using via standalone CMake (after `cmake --install`):
 
 ```cmake
 find_package(maintenance_state_store REQUIRED)
 target_link_libraries(your_target PRIVATE maintenance::maintenance_state_store)
 ```
+
+When using in a colcon workspace, see [colcon Workspace (ROS2)](#colcon-workspace-ros2) above.
 
 ---
 
@@ -252,15 +279,16 @@ If the state file becomes corrupted, recovery must be performed manually
 
 Three jobs run on every push and pull request to `main`.
 
-| Job              | What it does                                                    |
-| ---------------- | --------------------------------------------------------------- |
-| `cpp`            | Build, ctest, `cmake --install` → upload C++ artifact           |
-| `python`         | pytest × Python 3.10–3.14 matrix → upload wheel artifact (3.12) |
-| `compat`         | Build C++, run 4 cross-language subprocess tests                |
+| Job      | What it does                                                    |
+| -------- | --------------------------------------------------------------- |
+| `cpp`    | Build and ctest                                                 |
+| `python` | pytest × Python 3.10–3.14 matrix → upload wheel artifact (3.12) |
+| `compat` | Build C++, run 4 cross-language subprocess tests                |
 
 ### Artifacts
 
 | Artifact                               | Contents                                  |
 | -------------------------------------- | ----------------------------------------- |
-| `maintenance_state_store-cpp-<sha>`    | `.a` + `.so*` + `.hpp` + CMake config     |
 | `maintenance_state_store-python-<sha>` | `.whl` + `.tar.gz` (built on Python 3.12) |
+
+The C++ library is distributed as source via this repository and built in-tree by the consuming workspace (colcon / CMake).

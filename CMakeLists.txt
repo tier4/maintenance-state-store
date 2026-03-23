@@ -8,28 +8,32 @@ string(REGEX REPLACE "[-+].*$" "" _cmake_version "${_version}")
 
 project(maintenance_state_store VERSION ${_cmake_version} LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
 # ---------------------------------------------------------------------------
 # Options
 # ---------------------------------------------------------------------------
-option(BUILD_TESTING "Build GoogleTest unit tests" ON)
+# Default BUILD_TESTING to OFF when used as a subdirectory (e.g. FetchContent)
+if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    option(BUILD_TESTING "Build GoogleTest unit tests" ON)
+else()
+    option(BUILD_TESTING "Build GoogleTest unit tests" OFF)
+endif()
 
 # ---------------------------------------------------------------------------
 # FetchContent dependencies
 # ---------------------------------------------------------------------------
 include(FetchContent)
 
-# nlohmann/json
-FetchContent_Declare(
-    nlohmann_json
-    GIT_REPOSITORY https://github.com/nlohmann/json.git
-    GIT_TAG        v3.11.3
-    GIT_SHALLOW    TRUE
-)
-FetchContent_MakeAvailable(nlohmann_json)
+# nlohmann/json — prefer an already-provided version (e.g. from parent project)
+find_package(nlohmann_json QUIET)
+if(NOT nlohmann_json_FOUND)
+    FetchContent_Declare(
+        nlohmann_json
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG        v3.11.3
+        GIT_SHALLOW    TRUE
+    )
+    FetchContent_MakeAvailable(nlohmann_json)
+endif()
 
 # GoogleTest (only fetched when testing is requested)
 if(BUILD_TESTING)
@@ -65,6 +69,8 @@ foreach(_type STATIC SHARED)
         VERSION     ${PROJECT_VERSION}
         SOVERSION   ${PROJECT_VERSION_MAJOR}
     )
+
+    target_compile_features(${_target} PUBLIC cxx_std_17)
 
     target_include_directories(${_target}
         PUBLIC
@@ -102,12 +108,6 @@ install(DIRECTORY include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-# Install nlohmann_json alongside so the exported target can find it.
-# We mark it for export as well to satisfy CMake's export validation.
-install(TARGETS nlohmann_json
-    EXPORT maintenance_state_store_targets
-)
-
 install(EXPORT maintenance_state_store_targets
     FILE maintenance_state_store_targets.cmake
     NAMESPACE maintenance::
@@ -134,3 +134,13 @@ install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/maintenance_state_store-config-version.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/maintenance_state_store
 )
+
+# ---------------------------------------------------------------------------
+# ament_cmake support (ROS2 / colcon workspace)
+# ---------------------------------------------------------------------------
+find_package(ament_cmake QUIET)
+if(ament_cmake_FOUND)
+    ament_export_targets(maintenance_state_store_targets HAS_LIBRARY_TARGET)
+    ament_export_include_directories(include)
+    ament_package()
+endif()
