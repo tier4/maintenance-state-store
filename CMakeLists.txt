@@ -80,7 +80,7 @@ foreach(_type STATIC SHARED)
 
     target_link_libraries(${_target}
         PRIVATE
-            nlohmann_json::nlohmann_json
+            $<BUILD_INTERFACE:nlohmann_json::nlohmann_json>
     )
 endforeach()
 
