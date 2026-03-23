@@ -1,0 +1,110 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  cpp:
+    name: C++ build & test
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -B build
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Test
+        run: cd build && ctest --output-on-failure
+
+  python:
+    name: Python ${{ matrix.python-version }} test
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install
+        run: pip install -e . pytest
+
+      - name: Test
+        run: pytest tests/test_store.py -v
+
+  lint-cpp:
+    name: C++ lint (clang-tidy)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang and clang-tidy
+        run: sudo apt-get install -y clang clang-tidy
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_TESTING=OFF
+
+      - name: Run clang-tidy
+        run: |
+          GCC_VER=$(g++ -dumpversion | cut -d. -f1)
+          clang-tidy \
+            -p build \
+            --extra-arg=-I/usr/include/c++/${GCC_VER} \
+            --extra-arg=-I/usr/include/x86_64-linux-gnu/c++/${GCC_VER} \
+            src/maintenance_state_store.cpp \
+            include/maintenance_state_store/maintenance_state_store.hpp
+
+  sonar:
+    name: SonarCloud scan
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: pip install -e . pytest pytest-cov
+
+      - name: Test with coverage
+        run: |
+          pytest tests/test_store.py \
+            --cov=maintenance_state_store \
+            --cov-report=xml:test_result/coverage.xml
+
+      - name: SonarCloud scan
+        uses: SonarSource/sonarcloud-github-action@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  compat:
+    name: Cross-language compatibility test
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build C++
+        run: cmake -B build && cmake --build build --parallel
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python package and pytest
+        run: pip install -e . pytest
+
+      - name: Run cross-language tests
+        run: pytest tests/test_store.py -v -k "cpp_writes or python_writes"

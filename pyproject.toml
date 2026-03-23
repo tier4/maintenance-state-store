@@ -1,0 +1,20 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "maintenance-state-store"
+dynamic = ["version"]
+description = "Persistent maintenance state management for vehicle OTA safety systems"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.hatch.version]
+path = "VERSION"
+pattern = "^(?P<version>[0-9]+\\.[0-9]+\\.[0-9]+)"
+
+[tool.hatch.build.targets.wheel]
+packages = ["python/maintenance_state_store"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
