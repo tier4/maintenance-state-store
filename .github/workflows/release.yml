@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  cpp:
+    name: C++ release build
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Write version from tag
+        run: echo "${GITHUB_REF_NAME#v}" > VERSION
+
+      - name: Configure
+        run: cmake -B build -DBUILD_TESTING=OFF
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Install
+        run: cmake --install build --prefix install
+
+      - name: Upload C++ artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: maintenance_state_store-cpp-${{ github.ref_name }}
+          path: install/
+
+  python:
+    name: Python release build
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Write version from tag
+        run: echo "${GITHUB_REF_NAME#v}" > VERSION
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build tools
+        run: pip install build
+
+      - name: Build wheel
+        run: python -m build
+
+      - name: Upload Python artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: maintenance_state_store-python-${{ github.ref_name }}
+          path: dist/

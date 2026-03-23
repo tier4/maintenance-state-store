@@ -1,0 +1,5 @@
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/maintenance_state_store_targets.cmake")
+
+check_required_components(maintenance_state_store)
