@@ -5,6 +5,9 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+
 jobs:
   cpp:
     name: C++ release build
@@ -24,11 +27,13 @@ jobs:
       - name: Install
         run: cmake --install build --prefix install
 
-      - name: Upload C++ artifact
-        uses: actions/upload-artifact@v4
+      - name: Package
+        run: tar czf maintenance_state_store-cpp-${{ github.ref_name }}.tar.gz -C install .
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
         with:
-          name: maintenance_state_store-cpp-${{ github.ref_name }}
-          path: install/
+          files: maintenance_state_store-cpp-${{ github.ref_name }}.tar.gz
 
   python:
     name: Python release build
@@ -49,8 +54,7 @@ jobs:
       - name: Build wheel
         run: python -m build
 
-      - name: Upload Python artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
         with:
-          name: maintenance_state_store-python-${{ github.ref_name }}
-          path: dist/
+          files: dist/*
