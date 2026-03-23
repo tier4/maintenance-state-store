@@ -2,8 +2,11 @@ cmake_minimum_required(VERSION 3.16)
 
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" _version)
 string(STRIP "${_version}" _version)
+# CMake VERSION only accepts numeric major.minor.patch; strip pre-release suffix
+# (e.g. "0.0.1-alpha.1" -> "0.0.1")
+string(REGEX REPLACE "[-+].*$" "" _cmake_version "${_version}")
 
-project(maintenance_state_store VERSION ${_version} LANGUAGES CXX)
+project(maintenance_state_store VERSION ${_cmake_version} LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
