@@ -52,7 +52,7 @@ constexpr std::array<uint32_t, 256> make_crc32_table()
         }
         // std::array::operator[] (non-const) is not constexpr in libstdc++-11;
         // data() returns a constexpr pointer, so pointer-indexed write is used instead.
-        table.data()[i] = crc;
+        table.data()[i] = crc; // NOLINT(readability-simplify-subscript-expr)
     }
     return table;
 }

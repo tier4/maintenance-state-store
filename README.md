@@ -2,10 +2,6 @@
 
 A library for **safe persistent management of maintenance state** in a vehicle OTA safety system.
 
-Design document: Prevent OTA updates during vehicle operation - Developer Design Document
-
----
-
 ## Background
 
 To prevent OTA (Over-The-Air) updates from being accidentally applied to a vehicle while it is driving,
@@ -182,10 +178,10 @@ if (state == State::UNKNOWN) {
 
 // Write (atomic)
 bool ok = store.write(State::ON);   // Enter maintenance mode
-bool ok = store.write(State::OFF);  // Exit maintenance mode
+ok = store.write(State::OFF);       // Exit maintenance mode
 
 // For CLI / debug tooling only — do not call from application logic
-bool ok = store.force_write(State::OFF);
+ok = store.force_write(State::OFF);
 ```
 
 When using via standalone CMake (after `cmake --install`):
@@ -277,18 +273,22 @@ If the state file becomes corrupted, recovery must be performed manually
 
 ## CI
 
-Three jobs run on every push and pull request to `main`.
+Five jobs run on every push and pull request to `main`.
 
-| Job      | What it does                                                    |
-| -------- | --------------------------------------------------------------- |
-| `cpp`    | Build and ctest                                                 |
-| `python` | pytest × Python 3.10–3.14 matrix → upload wheel artifact (3.12) |
-| `compat` | Build C++, run 4 cross-language subprocess tests                |
+| Job        | What it does                                     |
+| ---------- | ------------------------------------------------ |
+| `cpp`      | Build and ctest                                  |
+| `python`   | pytest × Python 3.10–3.14 matrix                 |
+| `lint-cpp` | clang-tidy static analysis                       |
+| `sonar`    | SonarCloud scan (Python coverage)                |
+| `compat`   | Build C++, run 4 cross-language subprocess tests |
 
-### Artifacts
+### Release Artifacts
 
-| Artifact                               | Contents                                  |
-| -------------------------------------- | ----------------------------------------- |
-| `maintenance_state_store-python-<sha>` | `.whl` + `.tar.gz` (built on Python 3.12) |
+On `v*` tag push, the release workflow publishes the following to the GitHub Release:
+
+| File              | Contents                                  |
+| ----------------- | ----------------------------------------- |
+| `.whl`, `.tar.gz` | Python package (built on Python 3.12)     |
 
 The C++ library is distributed as source via this repository and built in-tree by the consuming workspace (colcon / CMake).
