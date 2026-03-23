@@ -50,7 +50,9 @@ constexpr std::array<uint32_t, 256> make_crc32_table()
         for (int j = 0; j < 8; ++j) {
             crc = (crc & 1u) ? (crc >> 1) ^ kCrc32Polynomial : crc >> 1;
         }
-        table[i] = crc;
+        // std::array::operator[] (non-const) is not constexpr in libstdc++-11;
+        // data() returns a constexpr pointer, so pointer-indexed write is used instead.
+        table.data()[i] = crc;
     }
     return table;
 }
