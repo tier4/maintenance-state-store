@@ -108,33 +108,6 @@ install(DIRECTORY include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-install(EXPORT maintenance_state_store_targets
-    FILE maintenance_state_store_targets.cmake
-    NAMESPACE maintenance::
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/maintenance_state_store
-)
-
-# Generate and install package config files
-include(CMakePackageConfigHelpers)
-
-configure_package_config_file(
-    ${CMAKE_CURRENT_LIST_DIR}/cmake/maintenance_state_store-config.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/maintenance_state_store-config.cmake
-    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/maintenance_state_store
-)
-
-write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/maintenance_state_store-config-version.cmake
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY SameMajorVersion
-)
-
-install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/maintenance_state_store-config.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/maintenance_state_store-config-version.cmake
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/maintenance_state_store
-)
-
 # ---------------------------------------------------------------------------
 # ament_cmake support (ROS2 / colcon workspace)
 # ---------------------------------------------------------------------------
@@ -143,4 +116,31 @@ if(ament_cmake_FOUND)
     ament_export_targets(maintenance_state_store_targets HAS_LIBRARY_TARGET)
     ament_export_include_directories(include)
     ament_package()
+else()
+    # Plain CMake config files (not needed when ament generates its own)
+    install(EXPORT maintenance_state_store_targets
+        FILE maintenance_state_store_targets.cmake
+        NAMESPACE maintenance::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/maintenance_state_store
+    )
+
+    include(CMakePackageConfigHelpers)
+
+    configure_package_config_file(
+        ${CMAKE_CURRENT_LIST_DIR}/cmake/maintenance_state_store-config.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/maintenance_state_store-config.cmake
+        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/maintenance_state_store
+    )
+
+    write_basic_package_version_file(
+        ${CMAKE_CURRENT_BINARY_DIR}/maintenance_state_store-config-version.cmake
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY SameMajorVersion
+    )
+
+    install(FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/maintenance_state_store-config.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/maintenance_state_store-config-version.cmake
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/maintenance_state_store
+    )
 endif()
