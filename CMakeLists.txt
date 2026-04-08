@@ -68,6 +68,7 @@ foreach(_type STATIC SHARED)
         OUTPUT_NAME maintenance_state_store
         VERSION     ${PROJECT_VERSION}
         SOVERSION   ${PROJECT_VERSION_MAJOR}
+        POSITION_INDEPENDENT_CODE ON
     )
 
     target_compile_features(${_target} PUBLIC cxx_std_17)
